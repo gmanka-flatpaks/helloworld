@@ -1,0 +1,16 @@
+id: io.github.helloworld
+command: helloworld.sh
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+modules:
+  - name: helloworld
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 helloworld.sh /app/bin/helloworld.sh
+    sources:
+      - type: script
+        dest-filename: helloworld.sh
+        commands:
+          - echo hello world
+
