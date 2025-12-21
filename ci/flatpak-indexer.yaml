@@ -9,7 +9,7 @@ registries:
 
 indexes:
   latest-amd64:
-    output: ${OUTPUT_DIR:pages}/index/static
+    output: ${OUTPUT_DIR:pages}/index/static/index.html
     registry: ghcr
     architecture: amd64
     tag: latest
