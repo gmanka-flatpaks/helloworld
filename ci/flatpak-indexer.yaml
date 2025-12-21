@@ -1,0 +1,16 @@
+redis_url: redis://localhost:6379
+
+registries:
+  ghcr:
+    public_url: https://ghcr.io/
+    datasource: direct
+    repositories:
+      - gmanka-flatpaks/helloworld
+
+indexes:
+  latest-amd64:
+    output: ${OUTPUT_DIR:pages}/index/static
+    registry: ghcr
+    architecture: amd64
+    tag: latest
+    extract_icons: false
