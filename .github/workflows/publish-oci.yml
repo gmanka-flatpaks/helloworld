@@ -1,5 +1,4 @@
 name: publish-oci
-
 on:
   push:
     branches:
@@ -16,74 +15,40 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
+      - uses: actions/checkout@v6
+      - name: dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y flatpak flatpak-builder skopeo redis-server python3-pip libkrb5-dev
-
-      - name: Add Flathub remote
+          flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          python3 -m pip install --upgrade pip
+          python3 -m pip install git+https://github.com/owtaylor/flatpak-indexer.git
+      - name: build flatpak repo
         run: |
-          flatpak remote-add --if-not-exists --user \
-            flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-
-      - name: Build Flatpak repo
-        run: |
-          flatpak-builder --user --install-deps-from=flathub \
-            --force-clean --repo=repo build helloworld.yml
-
+          flatpak-builder --user --install-deps-from=flathub --force-clean --repo=repo build helloworld.yml
       - name: Build OCI layout
         run: |
           APP_ID=io.github.helloworld
           BRANCH=master
-          flatpak build-bundle --oci repo oci-image "$APP_ID" "$BRANCH"
-
-      - name: Install flatpak-indexer
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install \
-            git+https://github.com/owtaylor/flatpak-indexer.git
-
-      - name: Login to GHCR
+          flatpak build-bundle --oci repo oci-image $APP_ID $BRANCH
+      - name: login to ghcr
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          skopeo login --authfile "$RUNNER_TEMP/auth.json" \
-            -u "${{ github.actor }}" -p "$GHCR_TOKEN" ghcr.io
-          echo "REGISTRY_AUTH_FILE=$RUNNER_TEMP/auth.json" >> "$GITHUB_ENV"
-
-      - name: Push OCI image
+          skopeo login --authfile auth.json -u '${{ github.actor }}' -p '${{ secrets.GITHUB_TOKEN }}' ghcr.io
+      - name: push oci image
         run: |
-          IMAGE="ghcr.io/${{ github.repository_owner }}/helloworld:latest"
-          skopeo copy --authfile "$REGISTRY_AUTH_FILE" \
-            oci:./oci-image "docker://$IMAGE"
-
-      - name: Build OCI index for Pages
+          IMAGE='ghcr.io/${{ github.repository_owner }}/helloworld:latest'
+          skopeo copy --authfile auth.json oci:./oci-image docker://$IMAGE
+      - name: build oci index for pages
         run: |
           mkdir -p pages/index
           touch pages/.nojekyll
           redis-server --daemonize yes
-          OUTPUT_DIR=pages \
-            REGISTRY_AUTH_FILE="$REGISTRY_AUTH_FILE" \
-            flatpak-indexer -c ci/flatpak-indexer.yaml index
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+          export OUTPUT_DIR=pages
+          export REGISTRY_AUTH_FILE=auth.json
+          flatpak-indexer -c ci/flatpak-indexer.yaml index
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: pages
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v4
