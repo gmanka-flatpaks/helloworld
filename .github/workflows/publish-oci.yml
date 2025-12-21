@@ -67,7 +67,7 @@ jobs:
           redis-server --daemonize yes
           OUTPUT_DIR=pages \
             REGISTRY_AUTH_FILE="$REGISTRY_AUTH_FILE" \
-            python3 -m flatpak_indexer.cli -c ci/flatpak-indexer.yaml index
+            flatpak-indexer -c ci/flatpak-indexer.yaml index
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
