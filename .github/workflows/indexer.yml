@@ -18,6 +18,8 @@ jobs:
           redis-version: latest
       - name: dependencies
         run: |
+          sudo apt update
+          sudo apt install -y libkrb5-dev
           uv venv
           uv pip install git+https://github.com/owtaylor/flatpak-indexer.git
           mkdir -p pages/index
@@ -25,4 +27,4 @@ jobs:
       - name: run flatpak-indexer
         env:
           OUTPUT_DIR: pages
-        run: flatpak-indexer -c ci/flatpak-indexer.yaml index
+        run: uv run flatpak-indexer -c ci/flatpak-indexer.yaml index
