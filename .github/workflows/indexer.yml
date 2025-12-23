@@ -1,0 +1,25 @@
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: '3.14'
+      - uses: shogo82148/actions-setup-redis@v1
+        id: redis
+        with:
+          redis-version: latest
+      - name: dependencies
+        run: |
+          uv venv
+          uv pip install git+https://github.com/owtaylor/flatpak-indexer.git
+          mkdir -p pages/index
+          touch pages/.nojekyll
+      - name: run flatpak-indexer
+        env:
+          OUTPUT_DIR: pages
+        run: flatpak-indexer -c ci/flatpak-indexer.yaml index
