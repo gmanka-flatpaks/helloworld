@@ -1,6 +1,5 @@
 on:
   workflow_dispatch: {}
-
 jobs:
   index:
     runs-on: ubuntu-latest
@@ -22,8 +21,6 @@ jobs:
           sudo apt install -y libkrb5-dev
           uv venv
           uv pip install git+https://github.com/owtaylor/flatpak-indexer.git
-          mkdir -p pages/index
-          touch pages/.nojekyll
       - name: run flatpak-indexer
         env:
           OUTPUT_DIR: pages
