@@ -14,6 +14,8 @@ jobs:
       - uses: actions/checkout@v6
       - name: dependencies
         run: |
+          sudo apt update
+          sudo apt install -y flatpak flatpak-builder skopeo redis-server python3-pip libkrb5-dev
           flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
           python3 -m pip install --upgrade pip
           python3 -m pip install git+https://github.com/owtaylor/flatpak-indexer.git
