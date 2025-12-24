@@ -1,5 +1,8 @@
 on:
   workflow_dispatch: {}
+permissions:
+  pages: write
+  id-token: write
 jobs:
   index:
     runs-on: ubuntu-latest
