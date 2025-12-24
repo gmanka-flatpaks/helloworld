@@ -1,0 +1,38 @@
+on:
+  workflow_call:
+    inputs:
+      runner_name:
+        required: true
+        type: string
+      runner_arch:
+        required: true
+        type: string
+      flatpak_name:
+        required: true
+        type: string
+      flatpak_id:
+        required: true
+        type: string
+jobs:
+  flatpak-build-helper:
+    name: ${{ inputs.flatpak_name }} ${{ inputs.runner_arch }}
+    runs-on: ${{ inputs.runner_name }}
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-25.08
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v6
+      - name: build
+        run: |
+          git clone https://github.com/${{ github.repository_owner }}/${{ inputs.flatpak_name }}
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak-builder --disable-rofiles-fuse --user --install-deps-from=flathub --repo=repo build ${{ inputs.flatpak_name }}/${{ inputs.flatpak_id }}.yml
+          flatpak build-bundle repo ${{ inputs.flatpak_name }}-${{ inputs.runner_arch }}.flatpak ${{ inputs.flatpak_id }} master
+          flatpak build-bundle --oci repo oci-output ${{ inputs.flatpak_id }} master
+          skopeo login --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} ghcr.io
+          skopeo copy oci:oci-output docker://ghcr.io/${{ github.repository_owner }}/helloworld:latest
+      - name: upload bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.flatpak_name }}-${{ inputs.runner_arch }}
+          path: ${{ inputs.flatpak_name }}-${{ inputs.runner_arch }}.flatpak

@@ -1,0 +1,29 @@
+on:
+  workflow_dispatch: {}
+jobs:
+  flatpak-build-helper:
+    strategy:
+      matrix:
+        flatpak:
+          - name: helloworld
+            id: io.github.helloworld
+        runner:
+          - name: ubuntu-24.04
+            arch: x86_64
+          - name: ubuntu-24.04-arm
+            arch: aarch64
+    name: ${{ matrix.flatpak.name }} ${{ matrix.runner.arch }}
+    secrets: inherit
+    uses: ./.github/workflows/flatpak-build-helper.yml
+    with:
+      runner_name: ${{ matrix.runner.name }}
+      runner_arch: ${{ matrix.runner.arch }}
+      flatpak_name: ${{ matrix.flatpak.name }}
+      flatpak_id: ${{ matrix.flatpak.id }}
+  indexer:
+    permissions:
+      pages: write
+      id-token: write
+    secrets: inherit
+    needs: flatpak-build-helper
+    uses: ./.github/workflows/indexer.yml
