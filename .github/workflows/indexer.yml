@@ -17,6 +17,7 @@ jobs:
           redis-version: latest
       - name: dependencies
         run: |
+          mkdir -p pages/index
           sudo apt update
           sudo apt install -y libkrb5-dev
           uv venv
