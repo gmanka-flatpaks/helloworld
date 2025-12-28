@@ -20,14 +20,19 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y flatpak ostree
+          sudo sysctl -w kernel.unprivileged_userns_clone=1
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          sudo sysctl -w user.max_user_namespaces=28633
           ostree init --mode=archive-z2 --repo repo
           for bundle in artifacts/*/*.flatpak ; do
             flatpak build-import-bundle repo $bundle
           done
-          skopeo copy 'oci:oci:app/${{ inputs.flatpak_id }}/x86_64/master' containers-storage:app:amd64
-          skopeo copy 'oci:oci:app/${{ inputs.flatpak_id }}/aarch64/master' containers-storage:app:arm64
+          flatpak build-bundle --oci --arch=x86_64 repo oci-x86_64 ${{ inputs.flatpak_id }}
+          flatpak build-bundle --oci --arch=aarch64 repo oci-aarch64 ${{ inputs.flatpak_id }}
+          skopeo copy 'oci:oci-x86_64:app/${{ inputs.flatpak_id }}/x86_64/master' containers-storage:app:amd64
+          skopeo copy 'oci:oci-aarch64:app/${{ inputs.flatpak_id }}/aarch64/master' containers-storage:app:arm64
           podman manifest create app
-          podman manifest add app app:amd64
-          podman manifest add app app:arm64
+          podman manifest add app containers-storage:app:amd64
+          podman manifest add app containers-storage:app:arm64
           podman login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
-          podman manifest push --all app docker://ghcr.io/${{ github.repository_owner }}/${{ inputs.flatpak_name }}:test
+          podman manifest push --all app docker://ghcr.io/${{ github.repository_owner }}/${{ inputs.flatpak_name }}:latest

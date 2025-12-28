@@ -9,15 +9,10 @@ registries:
       - gmanka-flatpaks/helloworld
 
 indexes:
-  latest-arm64:
+  latest:
     output: pages/index/static
     registry: ghcr
-    architecture: arm64
-    tag: latest-aarch64
-    extract_icons: false
-  latest-amd64:
-    output: pages/index/static-amd64
-    registry: ghcr
-    architecture: amd64
-    tag: latest-x86_64
+    # "" means all architectures in flatpak-indexer.
+    architecture_expand: [""]
+    tag: latest
     extract_icons: false
