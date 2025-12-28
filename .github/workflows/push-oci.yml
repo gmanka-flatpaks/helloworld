@@ -1,10 +1,15 @@
 on:
-  workflow_call: {}
+  workflow_call:
+    inputs:
+      flatpak_name:
+        required: true
+        type: string
+      flatpak_id:
+        required: true
+        type: string
 jobs:
-  flatpak-repo-merge:
+  push-oci:
     runs-on: ubuntu-24.04
-    env:
-      APP_ID: io.github.helloworld
     permissions:
       packages: write
     steps:
@@ -12,5 +17,20 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
-      - name: test
-        run: tree artifacts
+      - run: |
+          tree
+      - name: push-oci
+        run: |
+          sudo apt update
+          sudo apt install -y flatpak ostree
+          ostree init --mode=archive-z2 --repo repo
+          for bundle in artifacts/*/*.flatpak ; do
+            flatpak build-import-bundle repo $bundle
+          done
+          skopeo copy 'oci:oci:app/${{ inputs.flatpak_id }}/x86_64/master' containers-storage:app:amd64
+          skopeo copy 'oci:oci:app/${{ inputs.flatpak_id }}/aarch64/master' containers-storage:app:arm64
+          podman manifest create app
+          podman manifest add app app:amd64
+          podman manifest add app app:arm64
+          podman login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
+          podman manifest push --all app docker://ghcr.io/${{ github.repository_owner }}/${{ inputs.flatpak_name }}:test

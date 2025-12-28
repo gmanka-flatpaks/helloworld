@@ -2,8 +2,6 @@ on:
   workflow_dispatch: {}
 jobs:
   flatpak-build-helper:
-    permissions:
-      packages: write
     strategy:
       matrix:
         flatpak:
@@ -15,7 +13,6 @@ jobs:
           - name: ubuntu-24.04-arm
             arch: aarch64
     name: ${{ matrix.flatpak.name }} ${{ matrix.runner.arch }}
-    secrets: inherit
     uses: ./.github/workflows/flatpak-build-helper.yml
     with:
       runner_name: ${{ matrix.runner.name }}
@@ -23,14 +20,23 @@ jobs:
       flatpak_name: ${{ matrix.flatpak.name }}
       flatpak_id: ${{ matrix.flatpak.id }}
   push-oci:
-    secrets: inherit
     needs: flatpak-build-helper
+    strategy:
+      matrix:
+        flatpak:
+          - name: helloworld
+            id: io.github.helloworld
+    permissions:
+      packages: write
+    secrets: inherit
     uses: ./.github/workflows/push-oci.yml
+    with:
+      flatpak_name: ${{ matrix.flatpak.name }}
+      flatpak_id: ${{ matrix.flatpak.id }}
   indexer:
+    needs: push-oci
     permissions:
       pages: write
       id-token: write
       packages: read
-    secrets: inherit
-    needs: push-oci
     uses: ./.github/workflows/indexer.yml
