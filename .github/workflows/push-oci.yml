@@ -20,9 +20,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y flatpak ostree
-          sudo sysctl -w kernel.unprivileged_userns_clone=1
           sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-          sudo sysctl -w user.max_user_namespaces=28633
           ostree init --mode=archive-z2 --repo repo
           for bundle in artifacts/*/*.flatpak ; do
             flatpak build-import-bundle repo $bundle
