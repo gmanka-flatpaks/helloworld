@@ -22,11 +22,15 @@ jobs:
       runner_arch: ${{ matrix.runner.arch }}
       flatpak_name: ${{ matrix.flatpak.name }}
       flatpak_id: ${{ matrix.flatpak.id }}
+  push-oci:
+    secrets: inherit
+    needs: flatpak-build-helper
+    uses: ./.github/workflows/push-oci.yml
   indexer:
     permissions:
       pages: write
       id-token: write
       packages: read
     secrets: inherit
-    needs: flatpak-build-helper
+    needs: push-oci
     uses: ./.github/workflows/indexer.yml
