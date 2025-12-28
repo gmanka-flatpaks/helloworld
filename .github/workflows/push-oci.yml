@@ -22,14 +22,12 @@ jobs:
           sudo apt install -y flatpak ostree
           sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
           ostree init --mode=archive-z2 --repo repo
-          for bundle in artifacts/*/*.flatpak ; do
-            flatpak build-import-bundle repo $bundle
-          done
-          flatpak build-bundle --oci --arch=x86_64  repo oci ${{ inputs.flatpak_id }}
-          flatpak build-bundle --oci --arch=aarch64 repo oci ${{ inputs.flatpak_id }}
-          skopeo copy 'oci:oci:app/${{ inputs.flatpak_id }}/x86_64/master'  containers-storage:app:amd64
-          skopeo copy 'oci:oci:app/${{ inputs.flatpak_id }}/aarch64/master' containers-storage:app:arm64
           podman manifest create app
+          for arch in x86_64 aarch64; do
+            flatpak build-import-bundle repo artifacts/${{ inputs.flatpak_name }}-${arch}/${{ inputs.flatpak_name }}-${arch}.flatpak
+            flatpak build-bundle --oci --arch=$arch repo oci ${{ inputs.flatpak_id }}
+            skopeo copy oci:oci:app/${{ inputs.flatpak_id }}/${arch}/master  containers-storage:app:amd64
+          done
           podman manifest add app containers-storage:app:amd64
           podman manifest add app containers-storage:app:arm64
           podman login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
