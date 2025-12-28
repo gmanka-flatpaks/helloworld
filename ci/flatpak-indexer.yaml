@@ -9,9 +9,15 @@ registries:
       - gmanka-flatpaks/helloworld
 
 indexes:
-  latest-amd64:
+  latest-arm64:
     output: pages/index/static
     registry: ghcr
+    architecture: arm64
+    tag: latest-aarch64
+    extract_icons: false
+  latest-amd64:
+    output: pages/index/static-amd64
+    registry: ghcr
     architecture: amd64
-    tag: latest
+    tag: latest-x86_64
     extract_icons: false

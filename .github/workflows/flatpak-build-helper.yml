@@ -53,4 +53,7 @@ jobs:
           flatpak build-import-bundle repo artifacts/*.flatpak
           flatpak build-bundle --oci repo oci-output ${{ inputs.flatpak_id }}
           skopeo login --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} ghcr.io
-          skopeo copy oci:oci-output docker://ghcr.io/${{ github.repository_owner }}/helloworld:latest
+          skopeo copy oci:oci-output docker://ghcr.io/${{ github.repository_owner }}/helloworld:latest-${{ inputs.runner_arch }}
+          if [ "${{ inputs.runner_arch }}" = "aarch64" ]; then
+            skopeo copy oci:oci-output docker://ghcr.io/${{ github.repository_owner }}/helloworld:latest
+          fi
