@@ -3,6 +3,8 @@ on:
 jobs:
   flatpak-repo-merge:
     runs-on: ubuntu-24.04
+    env:
+      APP_ID: io.github.helloworld
     permissions:
       packages: write
     steps:
@@ -10,5 +12,5 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
-      - run: |
-          echo TODO: push all .flatpak bundles from artifacts/ dir to the registry, no separate tags
+      - name: test
+        run: tree artifacts
