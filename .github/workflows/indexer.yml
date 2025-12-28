@@ -4,6 +4,7 @@ on:
 permissions:
   pages: write
   id-token: write
+  packages: read
 jobs:
   index:
     runs-on: ubuntu-latest

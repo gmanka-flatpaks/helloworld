@@ -2,6 +2,8 @@ on:
   workflow_dispatch: {}
 jobs:
   flatpak-build-helper:
+    permissions:
+      packages: write
     strategy:
       matrix:
         flatpak:
@@ -24,6 +26,7 @@ jobs:
     permissions:
       pages: write
       id-token: write
+      packages: read
     secrets: inherit
     needs: flatpak-build-helper
     uses: ./.github/workflows/indexer.yml
