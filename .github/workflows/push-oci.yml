@@ -27,10 +27,10 @@ jobs:
           for bundle in artifacts/*/*.flatpak ; do
             flatpak build-import-bundle repo $bundle
           done
-          flatpak build-bundle --oci --arch=x86_64 repo oci-x86_64 ${{ inputs.flatpak_id }}
-          flatpak build-bundle --oci --arch=aarch64 repo oci-aarch64 ${{ inputs.flatpak_id }}
-          skopeo copy 'oci:oci-x86_64:app/${{ inputs.flatpak_id }}/x86_64/master' containers-storage:app:amd64
-          skopeo copy 'oci:oci-aarch64:app/${{ inputs.flatpak_id }}/aarch64/master' containers-storage:app:arm64
+          flatpak build-bundle --oci --arch=x86_64  repo oci ${{ inputs.flatpak_id }}
+          flatpak build-bundle --oci --arch=aarch64 repo oci ${{ inputs.flatpak_id }}
+          skopeo copy 'oci:oci:app/${{ inputs.flatpak_id }}/x86_64/master'  containers-storage:app:amd64
+          skopeo copy 'oci:oci:app/${{ inputs.flatpak_id }}/aarch64/master' containers-storage:app:arm64
           podman manifest create app
           podman manifest add app containers-storage:app:amd64
           podman manifest add app containers-storage:app:arm64

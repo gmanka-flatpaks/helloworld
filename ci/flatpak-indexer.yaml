@@ -12,7 +12,6 @@ indexes:
   latest:
     output: pages/index/static
     registry: ghcr
-    # "" means all architectures in flatpak-indexer.
     architecture_expand: [""]
     tag: latest
     extract_icons: false
