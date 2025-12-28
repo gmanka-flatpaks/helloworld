@@ -21,7 +21,6 @@ jobs:
       image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-25.08
       options: --privileged
     steps:
-      - uses: actions/checkout@v6
       - name: build
         run: |
           git clone https://github.com/${{ github.repository_owner }}/${{ inputs.flatpak_name }}

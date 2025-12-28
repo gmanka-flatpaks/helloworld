@@ -13,12 +13,9 @@ jobs:
     permissions:
       packages: write
     steps:
-      - uses: actions/checkout@v6
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
-      - run: |
-          tree
       - name: push-oci
         run: |
           sudo apt update
